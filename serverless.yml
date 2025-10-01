@@ -1,0 +1,60 @@
+service: acled-trendfinder-api
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: eu-west-2
+  timeout: 30
+  memorySize: 512
+  httpApi:
+    cors:
+      allowedOrigins: ['*']
+      allowedMethods: ['GET', 'OPTIONS']
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+        - X-Debug-Key
+        - X-Correlation-Id
+  environment:
+    TABLE_NAME: events
+    DATE_FIELD: event_date
+    DEFAULT_PAGE_SIZE: 50
+    MAX_PAGE_SIZE: 500
+    LOG_LEVEL: INFO
+    VERBOSE: false
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource: '*'  # tighten to your secret ARN
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: '*'
+  vpc:
+    securityGroupIds:
+      - sg-xxxxxxxx
+    subnetIds:
+      - subnet-aaaaaaa
+      - subnet-bbbbbbb
+
+functions:
+  trendfinder:
+    handler: handler.handler
+    events:
+      - httpApi:
+          path: /trendfinder
+          method: get
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    slim: true

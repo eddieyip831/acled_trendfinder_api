@@ -1,1 +1,5 @@
-pymysql==1.1.1
+pytest==8.3.2
+PyMySQL==1.1.1
+pydantic==1.10.13
+aws-embedded-metrics==3.1.1
+

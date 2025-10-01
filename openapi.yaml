@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: ACLED Trendfinder API
+  version: 1.0.0
+servers:
+  - url: https://api.acled.org
+paths:
+  /trendfinder:
+    get:
+      summary: Query events with filters and pagination
+      parameters:
+        - in: query
+          name: country
+          required: true
+          schema: { type: string, minLength: 2 }
+          description: Country name as stored in ACLED
+        - in: query
+          name: start_date
+          required: true
+          schema: { type: string, format: date }
+        - in: query
+          name: end_date
+          required: true
+          schema: { type: string, format: date }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: page_size
+          schema: { type: integer, minimum: 1, maximum: 500, default: 50 }
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+            enum: [event_date, fatalities, country]
+            default: event_date
+        - in: query
+          name: sort_dir
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: Page of events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrendfinderResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+  schemas:
+    TrendfinderResponse:
+      type: object
+      required: [meta, data]
+      properties:
+        meta:
+          type: object
+          required: [page, page_size, total, total_pages]
+          properties:
+            page: { type: integer }
+            page_size: { type: integer }
+            total: { type: integer }
+            total_pages: { type: integer }
+            sort:
+              type: object
+              properties:
+                by: { type: string }
+                dir: { type: string }
+            filters: { type: object, additionalProperties: true }
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              event_id: { type: string }
+              event_date: { type: string, format: date }
+              country: { type: string }
+              admin1: { type: string }
+              event_type: { type: string }
+              sub_event_type: { type: string }
+              actor1: { type: string }
+              actor2: { type: string }
+              fatalities: { type: integer }
+              latitude: { type: number }
+              longitude: { type: number }
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error: { type: string }
+        message: { type: string }
+x-amazon-apigateway-importexport-version: "1.0"
+x-amazon-apigateway-integrations:
+  # For REST API you attach integrations per method under x-amazon-apigateway-integration.
+  # For HTTP API you attach at the route when importing through console or IaC.

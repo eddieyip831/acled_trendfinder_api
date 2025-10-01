@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: ACLED Trendfinder API
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 512
+    Tracing: Active
+    Environment:
+      Variables:
+        TABLE_NAME: events
+        DATE_FIELD: event_date
+        DEFAULT_PAGE_SIZE: 50
+        MAX_PAGE_SIZE: 500
+        LOG_LEVEL: INFO
+        VERBOSE: false
+
+Resources:
+  TrendfinderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.handler
+      CodeUri: .
+      Description: Trendfinder read only query
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: "*" # tighten to your secret ARN
+      Events:
+        HttpGet:
+          Type: HttpApi
+          Properties:
+            Path: /trendfinder
+            Method: GET
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-xxxxxxxx
+        SubnetIds:
+          - subnet-aaaaaaa
+          - subnet-bbbbbbb
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: ["*"]
+        AllowMethods: ["GET", "OPTIONS"]
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Debug-Key
+          - X-Correlation-Id
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/trendfinder"
+    Description: HTTP API invoke URL
