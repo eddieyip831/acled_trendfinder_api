@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local configs and secrets
+config.ini
+*.pem
+*.crt
+*.key
+
+# Deployment build artifacts
+build/
+dist/
+*.egg-info/
+function.zip
