@@ -1,0 +1,6 @@
+ruff==0.6.8
+bandit==1.7.9
+mypy==1.11.2
+pip-audit==2.7.3
+semgrep==1.87.0
+pre-commit==4.0.1
